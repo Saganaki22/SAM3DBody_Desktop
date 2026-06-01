@@ -1,4 +1,13 @@
+<div align="center">
+
 # SAM3DBody Desktop
+
+<img
+  width="80"
+  height="80"
+  alt="SAM3DBody Logo"
+  src="https://github.com/user-attachments/assets/73df9249-2c53-4bdf-aca2-e86da48bc4c6"
+/>
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D4)
 ![GPU](https://img.shields.io/badge/GPU-NVIDIA%20CUDA%2013-76B900)
@@ -10,6 +19,74 @@ SAM3DBody Desktop `0.1.1` is a Windows Tauri app for running the `SAM3DBody-cpp`
 native engine in-process. It does not launch the CLI as a sidecar. The UI calls
 Rust commands, Rust loads `fast_sam_3dbody.dll` with `libloading`, and the DLL
 executes the C++/CUDA inference pipeline through a plain C ABI.
+
+</div>
+
+https://github.com/user-attachments/assets/b0d01615-d000-4dbc-821e-d822b9ed754b
+
+## Pre-Compiled Executables 
+
+<details>
+<summary><strong>SAM3DBody Desktop v0.1.1 Downloads (click to expand)</strong></summary>
+
+<br>
+
+### Recommended: Portable CUDA Build
+
+Fastest way to get up and running.
+
+- No installer required
+- Extract and run
+- Recommended for most users
+
+**Download:**
+
+- [portable-cuda.zip](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/portable-cuda.zip)
+
+---
+
+### Windows Installer
+
+Standard Windows installation.
+
+**Download:**
+
+- [SAM3DBody.Desktop_0.1.1_x64-setup.exe](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/SAM3DBody.Desktop_0.1.1_x64-setup.exe)
+
+---
+
+### MSI Package
+
+For enterprise deployment and MSI-based installation workflows.
+
+**Download:**
+
+- [SAM3DBody.Desktop_0.1.1_x64_en-US.msi](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/SAM3DBody.Desktop_0.1.1_x64_en-US.msi)
+
+---
+
+### Required Models
+
+All release packages require the SAM3DBody model bundle from Hugging Face.
+
+**Download:**
+
+- [SAM3DBody-cpp-onnx-models.zip](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/SAM3DBody-cpp-onnx-models.zip)
+
+After extraction, place the resulting `onnx/` folder beside the portable application, or configure the model paths from within the application.
+
+---
+
+### Quick Start
+
+1. Download **portable-cuda.zip**.
+2. Download **SAM3DBody-cpp-onnx-models.zip**.
+3. Extract both archives.
+4. Place the extracted `onnx/` folder beside `sam3dbody-desktop.exe`.
+5. Launch the application.
+6. Load an image or video and start processing.
+
+</details>
 
 ## What It Does
 
