@@ -207,6 +207,15 @@ onnx/correctives.bin
 onnx/keypoint_mapping.bin
 ```
 
+The Windows installers and `portable-cuda.zip` already include the native DLLs.
+If you are building the app from source and do not want to rebuild/copy the
+native CUDA runtime files yourself, download the runtime DLL pack:
+
+[SAM3DBody-Desktop_engine-runtime-cuda13-win64-dlls.zip](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/SAM3DBody-Desktop_engine-runtime-cuda13-win64-dlls.zip)
+
+Extract it into `desktop/src-tauri/` so it creates
+`desktop/src-tauri/resources/engine/`.
+
 Place an already extracted `onnx/` folder next to the portable app or repo root.
 The UI can also browse to a custom ONNX folder, GGUF file, YOLO file, backbone,
 LBS body model, and BVH template. The links below are included for manual model
