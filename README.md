@@ -13,66 +13,19 @@ executes the C++/CUDA inference pipeline through a plain C ABI.
 
 ## What It Does
 
-- Loads the bundled CUDA engine DLL, or a custom `fast_sam_3dbody.dll`.
-- Finds bundled or manually downloaded model files without requiring an HF token.
-- Supports Browse buttons and glowing drag/drop targets for image, image-result
-  JSON, and video inputs.
-- Processes images and shows the source image with aligned boxes, optional
-  landmark points, and an optional MHR-70 skeleton overlay.
-- Provides preview zoom, pan, and reset for inspecting image overlays.
-- Shows all detected image meshes in the image 3D view. Multi-person image
-  results keep image left-right order and use `pred_cam_t` plus bbox size to
-  place nearer people forward and smaller background detections farther back.
-- Exports a static one-frame image BVH through the native BVH writer when the
-  original image is available. This is useful for a rest/static pose skeleton;
-  it is not temporal motion unless the input is a video.
-- Toggles image bbox, image landmarks, Image Skeleton, 3D Skeleton, 3D Body,
-  mesh wireframe, floor grid, and auto-rotation in the UI.
-- Provides a grid size slider from 8 to 32 divisions for image and video 3D
-  previews.
-- Preserves video mesh motion in 3D space using the extended video-preview C
-  callback. When `pred_cam_t` is available, the preview uses it as the same root
-  translation source that upstream writes into BVH; detector bboxes are only a
-  fallback and identity aid.
-- Exports the current image mesh as `.obj` or `.glb` with a save dialog and
-  success toast.
-- Saves image run JSON with real `mesh_vertices`, so that JSON can be imported
-  later to recreate the image 3D result without running inference again. Older
-  JSON that only says `"18439 vertices"` cannot recreate the mesh.
-- Processes videos through OpenCV's FFmpeg backend in-process.
-- Shows the input video beside the 3D preview.
-- Optional video `3D Body Overlay` renders the generated body mesh directly over
-  the video preview. New bundled DLLs stream projected 70-point `kps_2d` data so
-  the overlay is fitted to the model projection instead of only to the detector
-  bbox; older custom DLLs fall back to bbox fitting.
-- Keeps separate retained image and video 3D preview states so switching tabs
-  does not wipe the previous result.
-- Streams video mesh frames while export is running, then allows playback with a
-  seek bar, loop toggle, and 0.25x, 0.5x, 1x, 1.25x, and 2x viewer-only speeds.
-- Generates video motion into an internal cache first, then enables Extract
-  Motion so users can choose when and where to save BVH files.
-- Multi-person BVH export writes one BVH file per subject automatically, using
-  the upstream `BVHWriter` naming convention: `name_0.bvh`, `name_1.bvh`, etc.
-- Supports full body plus hands from the native MHR-70 output. The diagnostic
-  CSV writes all 70 3D keypoints per person and frame.
-- Includes upstream Butterworth temporal smoothing controls for video motion:
-  keypoints, body pose, hand pose, and root translation can be smoothed before
-  BVH/preview output; root rotation can optionally use the quaternion filter.
-- Provides an Abort button for video exports. The UI stops accepting late
-  preview/result updates immediately; the current native CUDA/OpenCV frame may
-  still finish because the upstream C API has no hard cancellation hook yet.
-- Optionally writes a diagnostic 70-keypoint CSV for video runs.
-- Includes collapsible hardware telemetry with 250 ms, 500 ms, 1000 ms, and
-  1500 ms polling options.
-- Keeps result JSON/text collapsed by default, with themed copy and save buttons.
-  Large JSON output is preview-truncated when expanded so the UI remains fast;
-  Copy and Save still use the complete text.
-- Opens model download links, the footer GitHub link, and the build release link
-  in the user's default browser.
-- Disables the browser/WebView context menu inside the app window.
-- Includes a settings popover with persistent Dark/Light theme buttons, accent
-  color choices, and a UI scale slider. The popover itself is not scaled while
-  the main UI is. The settings popover also links to the Apache-2.0 license.
+- Runs the native SAM3DBody CUDA engine inside a Tauri desktop app.
+- Supports image, image-result JSON, and video inputs with browse and drag/drop.
+- Shows 2D previews with bbox, landmarks, and skeleton overlays.
+- Shows image and video results in interactive Three.js 3D viewers.
+- Toggles body, skeleton, wireframe, grid, rotation, and grid size in the UI.
+- Exports image meshes as OBJ or GLB.
+- Exports static image BVH poses and multi-person video BVH motion files.
+- Uses the native MHR-70 full-body-plus-hands output.
+- Includes video smoothing controls, diagnostic 70-keypoint CSV output, video
+  playback controls, and abort for video generation.
+- Keeps image and video results separate when switching tabs.
+- Includes hardware telemetry, themed output copy/save, dark/light themes,
+  accent colors, UI scaling, and default-browser links.
 
 ## Supported Systems
 
@@ -182,21 +135,16 @@ The UI can also browse to a custom ONNX folder, GGUF file, YOLO file, backbone,
 LBS body model, and BVH template. The links below are included for manual model
 setup.
 
-Manual downloads:
+Manual model download:
 
 | File | Link |
 | --- | --- |
-| All-in-one CUDA zip | [SAM3DBody-cpp-onnx-models.zip](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/SAM3DBody-cpp-onnx-models.zip) |
-| `backbone.onnx` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone.onnx) |
-| `backbone.onnx.data` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone.onnx.data) |
-| `decoder.onnx` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/decoder.onnx) |
-| `yolo.onnx` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/yolo.onnx) |
-| `pipeline.gguf` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/pipeline.gguf) |
-| `body_model.lbs` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/body_model.lbs) |
-| `correctives.bin` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/correctives.bin) |
-| `keypoint_mapping.bin` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/keypoint_mapping.bin) |
-| `backbone_fp32.onnx` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone_fp32.onnx) |
-| `backbone_fp32.onnx.data` | [download](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone_fp32.onnx.data) |
+| All-in-one model zip | [SAM3DBody-cpp-onnx-models.zip](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/SAM3DBody-cpp-onnx-models.zip) |
+| Hugging Face model repo | [AmmarkoV/SAM3DBody-cpp-onnx-models](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models) |
+
+The all-in-one zip is hosted on Hugging Face. Individual model files are not
+mirrored in this repository; if you download them manually from Hugging Face,
+keep the filenames and place them in the same `onnx/` folder layout shown above.
 
 ## Build Requirements
 
@@ -215,7 +163,7 @@ Install:
 From the repository root:
 
 ```powershell
-$opencv = "$env:USERPROFILE\.codex\deps\opencv-4.10.0\opencv\build"
+$opencv = "C:\opencv\build"
 $cudnn = "$env:APPDATA\Python\Python314\site-packages\nvidia\cudnn\bin"
 $vsdev = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
 $ninja = "$env:APPDATA\Python\Python314\Scripts\ninja.exe"
@@ -319,28 +267,6 @@ Expected behavior:
   `cargo build --release`.
 - `npm run build:vite` may warn about a roughly 500 KB JavaScript chunk because
   Three.js is bundled. That warning is not a failed build.
-
-## Notes
-
-- The blank console window is removed in release builds by using the Windows GUI
-  subsystem, and child hardware polling commands are launched with no console
-  window.
-- OpenCV is used for video decode because it gives a stable in-process FFmpeg
-  backend without shipping an external `ffmpeg.exe`.
-- Tauri's asset protocol is enabled for user media previews, so selected videos
-  can be shown in the WebView while processing/export continues through the
-  native engine.
-- BVH is the main motion export path from the upstream repo. OBJ export is for a
-  single reconstructed image mesh; a per-frame mesh sequence export would be a
-  separate feature.
-- The UI's video People count reports the strongest per-frame estimate rather
-  than the accumulated per-frame detection count. The accumulated count remains
-  visible in the run output for debugging.
-- Video mesh preview events are grouped by source frame and person index, so the
-  3D video preview can show multiple people when the native engine emits them.
-  The UI also applies a lightweight bbox-IoU tracker matching the upstream live
-  BVH export rule, because the current C preview callback streams detections but
-  not the writer's final internal track IDs.
 
 ## Upstream And Model Credits
 
