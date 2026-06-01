@@ -142,9 +142,7 @@ Manual model download:
 | All-in-one model zip | [SAM3DBody-cpp-onnx-models.zip](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/SAM3DBody-cpp-onnx-models.zip) |
 | Hugging Face model repo | [AmmarkoV/SAM3DBody-cpp-onnx-models](https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models) |
 
-The all-in-one zip is hosted on Hugging Face. Individual model files are not
-mirrored in this repository; if you download them manually from Hugging Face,
-keep the filenames and place them in the same `onnx/` folder layout shown above.
+The all-in-one zip is hosted on HuggingFace
 
 ## Build Requirements
 
