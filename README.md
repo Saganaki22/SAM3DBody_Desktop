@@ -24,7 +24,7 @@ executes the C++/CUDA inference pipeline through a plain C ABI.
 
 https://github.com/user-attachments/assets/b0d01615-d000-4dbc-821e-d822b9ed754b
 
-## Pre-Compiled Executables 
+## Pre-Built Executables 
 
 <details>
 <summary><strong>SAM3DBody Desktop v0.1.1 Downloads (click to expand)</strong></summary>
