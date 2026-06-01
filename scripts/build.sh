@@ -1,0 +1,12 @@
+#!/bin/bash
+
+THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$THISDIR"
+cd ..
+
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+
+exit 0

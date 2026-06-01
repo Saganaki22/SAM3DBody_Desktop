@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SAM3DBody Desktop</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <img class="brand-mark" src="/body-svgrepo-com.svg" alt="" />
+          <div>
+            <h1>SAM3DBody Desktop</h1>
+            <p>CUDA body pose workbench</p>
+          </div>
+        </div>
+        <div class="status-stack">
+          <button id="settings-button" class="settings-button" type="button" aria-label="Settings">⚙</button>
+          <span id="engine-chip" class="chip">Engine unloaded</span>
+          <span id="model-chip" class="chip muted">Models checking</span>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="setup-pane">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Engine</h2>
+              <span id="dll-state" class="mini-state">DLL pending</span>
+            </div>
+            <label title="Optional. Leave empty to use the bundled fast_sam_3dbody.dll, or browse/type a custom DLL path.">
+              Engine DLL
+              <div class="path-row">
+                <input id="library-path" name="libraryPath" placeholder="fast_sam_3dbody.dll" />
+                <button id="browse-library" class="compact-button" type="button">Browse</button>
+              </div>
+            </label>
+            <div class="inline-fields">
+              <label>
+                CUDA
+                <input id="cuda-device" name="cudaDevice" type="number" value="0" />
+              </label>
+              <label>
+                People
+                <input id="max-persons" name="maxPersons" type="number" value="4" min="0" />
+              </label>
+            </div>
+            <div class="checks">
+              <label title="Use FP16 CUDA inference where the native engine supports it."><input id="use-fp16" name="useFp16" type="checkbox" checked /> FP16</label>
+              <label title="Skips mesh/keypoint body model output. Leave off for OBJ/GLB, skeleton, and BVH workflows."><input id="skip-body-model" name="skipBodyModel" type="checkbox" /> Skip mesh</label>
+              <label title="Reserved for TensorRT execution provider builds. Disabled in this package."><input id="use-trt-ep" name="useTrtEp" type="checkbox" disabled /> TensorRT</label>
+            </div>
+            <button id="load-engine" class="primary" type="button">Load Engine</button>
+            <button id="unload-engine" class="secondary" type="button" disabled>Unload Engine</button>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Models</h2>
+              <span id="model-state" class="mini-state">Not loaded</span>
+            </div>
+            <button id="refresh-models" class="secondary" type="button" title="Search bundled, portable, repo, and app data folders for a complete ONNX model directory.">Find Models</button>
+            <div class="progress">
+              <div id="model-progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="model-progress-text" class="progress-text">Checking local model files</div>
+            <p class="model-note">Put the extracted model files in an onnx folder beside the app, or set the paths below.</p>
+            <details class="manual-links">
+              <summary>Manual model downloads</summary>
+              <div class="link-grid">
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/SAM3DBody-cpp-onnx-models.zip" target="_blank">All-in-one zip</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone.onnx" target="_blank">backbone.onnx</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone.onnx.data" target="_blank">backbone.onnx.data</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/decoder.onnx" target="_blank">decoder.onnx</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/yolo.onnx" target="_blank">yolo.onnx</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/pipeline.gguf" target="_blank">pipeline.gguf</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/body_model.lbs" target="_blank">body_model.lbs</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/correctives.bin" target="_blank">correctives.bin</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/keypoint_mapping.bin" target="_blank">keypoint_mapping.bin</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone_fp32.onnx" target="_blank">backbone_fp32.onnx</a>
+                <a href="https://huggingface.co/AmmarkoV/SAM3DBody-cpp-onnx-models/resolve/main/backbone_fp32.onnx.data" target="_blank">backbone_fp32.onnx.data</a>
+              </div>
+            </details>
+
+            <div class="path-grid">
+              <label class="path-field">
+                ONNX folder
+                <div class="path-row">
+                  <input id="onnx-dir" name="onnxDir" placeholder="onnx" />
+                  <button id="browse-onnx-dir" class="compact-button" type="button">Browse</button>
+                </div>
+              </label>
+              <label class="path-field">
+                GGUF
+                <div class="path-row">
+                  <input id="gguf-path" name="ggufPath" placeholder="pipeline.gguf" />
+                  <button id="browse-gguf" class="compact-button" type="button">Browse</button>
+                </div>
+              </label>
+              <label class="path-field">
+                YOLO
+                <div class="path-row">
+                  <input id="yolo-path" name="yoloPath" placeholder="yolo.onnx" />
+                  <button id="browse-yolo" class="compact-button" type="button">Browse</button>
+                </div>
+              </label>
+              <label class="path-field">
+                Backbone
+                <div class="path-row">
+                  <input id="backbone-name" name="backboneName" placeholder="backbone.onnx" />
+                  <button id="browse-backbone" class="compact-button" type="button">Browse</button>
+                </div>
+              </label>
+            </div>
+          </section>
+        </aside>
+
+        <section class="run-pane">
+          <div class="mode-tabs" role="tablist">
+            <button id="image-tab" class="tab active" type="button">Image</button>
+            <button id="video-tab" class="tab" type="button">Video</button>
+          </div>
+
+          <div class="run-grid">
+            <div class="mode-column">
+              <section id="image-mode" class="mode-panel active">
+              <div class="panel">
+                <div class="panel-head">
+                  <h2>Image Inference</h2>
+                  <span id="image-state" class="mini-state">Idle</span>
+                </div>
+                <label class="path-field">
+                  Image path
+                  <div class="path-row">
+                    <input id="image-path" name="imagePath" placeholder="person.jpg or result.json" />
+                    <button id="browse-image" class="compact-button" type="button">Browse</button>
+                  </div>
+                </label>
+                <div id="image-dropzone" class="dropzone">Drop image or JSON here</div>
+                <label>
+                  Mesh output
+                  <input id="obj-path" name="objPath" placeholder="person_mesh.obj" />
+                </label>
+              <label title="OBJ exports a simple mesh. GLB exports a binary glTF scene with all detected image people.">
+                  Export format
+                  <select id="image-export-format" name="imageExportFormat">
+                    <option value="obj" selected>OBJ</option>
+                    <option value="glb">GLB</option>
+                  </select>
+                </label>
+                <button id="process-image" class="primary" type="button" title="Run one image through the loaded native engine.">Process Image</button>
+                <div id="image-progress" class="progress">
+                  <div id="image-progress-bar" class="progress-bar"></div>
+                </div>
+                <div id="image-progress-text" class="progress-text">No image running</div>
+                <button id="export-obj" class="secondary" type="button" title="Save the current image reconstruction as OBJ or GLB.">Export Mesh</button>
+                <button id="export-image-bvh" class="secondary" type="button" title="Export a one-frame static BVH per detected person using the native BVH writer.">Export Static BVH</button>
+                <div class="metric-row">
+                  <span>People</span>
+                  <strong id="people-count">0</strong>
+                  <span>ABI</span>
+                  <strong id="abi-version">-</strong>
+                </div>
+              </div>
+              </section>
+
+              <section id="video-mode" class="mode-panel">
+              <div class="panel">
+                <div class="panel-head">
+                  <h2>Video Export</h2>
+                  <span id="video-state" class="mini-state">Idle</span>
+                </div>
+                <label class="path-field">
+                  Video path
+                  <div class="path-row">
+                    <input id="video-path" name="videoPath" placeholder="clip.mp4" />
+                    <button id="browse-video" class="compact-button" type="button">Browse</button>
+                  </div>
+                </label>
+                <div id="video-dropzone" class="dropzone">Drop video here</div>
+                <label class="path-field">
+                  BVH output
+                  <div class="path-row">
+                    <input id="bvh-path" name="bvhPath" placeholder="clip_motion.bvh" />
+                    <button id="browse-bvh-output" class="compact-button" type="button">Browse</button>
+                  </div>
+                </label>
+                <label class="path-field">
+                  BVH template
+                  <div class="path-row">
+                    <input id="bvh-template-path" name="bvhTemplatePath" placeholder="body.bvh" />
+                    <button id="browse-bvh-template" class="compact-button" type="button">Browse</button>
+                  </div>
+                </label>
+                <label class="path-field">
+                  Body model LBS
+                  <div class="path-row">
+                    <input id="lbs-path" name="lbsPath" placeholder="body_model.lbs" />
+                    <button id="browse-lbs" class="compact-button" type="button">Browse</button>
+                  </div>
+                </label>
+                <label title="Optional diagnostic export containing bbox, camera translation, root rotation, and all 70 3D keypoints per processed frame.">
+                  Diagnostic CSV
+                  <input id="csv-path" name="csvPath" placeholder="optional keypoints.csv" />
+                </label>
+                <div class="smoothing-grid">
+                  <label class="check-inline" title="Apply upstream Butterworth low-pass smoothing to 70 3D keypoints, body pose, hand pose, and root translation before BVH/preview output.">
+                    <input id="butterworth-toggle" name="butterworth" type="checkbox" checked /> Smoothing
+                  </label>
+                  <label title="Butterworth cutoff in Hz. Lower values smooth more; values at/above Nyquist are passed through.">
+                    Cutoff Hz
+                    <input id="bw-cutoff" name="bwCutoff" type="number" min="0.1" step="0.5" value="6" />
+                  </label>
+                </div>
+                <div class="smoothing-grid">
+                  <label class="check-inline" title="Also smooth global root rotation in quaternion space. Useful for flip noise, but leave off if you need raw root rotation.">
+                    <input id="root-rotation-filter" name="rootRotationFilter" type="checkbox" /> Root rot
+                  </label>
+                  <label title="Optional rotation outlier clamp in degrees per frame. 0 disables the clamp.">
+                    Clamp deg
+                    <input id="rot-clamp-deg" name="rotClampDeg" type="number" min="0" step="5" value="0" />
+                  </label>
+                </div>
+                <div class="inline-fields">
+                  <label class="stepper-field">
+                    Stride
+                    <div class="number-stepper">
+                      <button id="frame-stride-down" class="step-button" type="button" aria-label="Decrease frame stride">-</button>
+                      <input id="frame-stride" name="frameStride" type="number" value="1" min="1" />
+                      <button id="frame-stride-up" class="step-button" type="button" aria-label="Increase frame stride">+</button>
+                    </div>
+                  </label>
+                  <label class="stepper-field">
+                    Max frames
+                    <div class="number-stepper">
+                      <button id="max-frames-down" class="step-button" type="button" aria-label="Decrease max frames">-</button>
+                      <input id="max-frames" name="maxFrames" type="number" value="0" min="0" />
+                      <button id="max-frames-up" class="step-button" type="button" aria-label="Increase max frames">+</button>
+                    </div>
+                  </label>
+                </div>
+                <button id="process-video" class="primary" type="button" title="Generate motion into an internal cache first, without forcing an immediate save.">Generate Motion</button>
+                <button id="extract-motion" class="secondary" type="button" disabled title="Save the generated BVH files after motion generation finishes. Multi-person outputs are copied together.">Extract Motion</button>
+                <button id="abort-video" class="danger" type="button" disabled hidden>Abort</button>
+                <div class="progress">
+                  <div id="video-progress-bar" class="progress-bar amber"></div>
+                </div>
+                <div id="video-progress-text" class="progress-text">No video running</div>
+              </div>
+              </section>
+
+              <section id="hardware-panel" class="hardware-panel">
+                <div class="panel-head">
+                  <h2>Hardware</h2>
+                  <div class="hardware-head-controls">
+                    <label>
+                      Poll
+                      <select id="hardware-poll-rate" name="hardwarePollRate" title="Hardware monitor polling interval. Lower values update faster and cost slightly more CPU.">
+                        <option value="250">250ms</option>
+                        <option value="500">500ms</option>
+                        <option value="1000" selected>1000ms</option>
+                        <option value="1500">1500ms</option>
+                      </select>
+                    </label>
+                    <button id="hardware-toggle" class="icon-button" type="button" aria-label="Collapse hardware">-</button>
+                  </div>
+                </div>
+                <div id="hardware-body" class="hardware-body">
+                  <div class="hardware-grid">
+                    <div class="hardware-meter">
+                      <div><span>VRAM</span><strong id="hw-vram-text">-</strong></div>
+                      <div class="meter-track"><div id="hw-vram-bar" class="meter-fill vram"></div></div>
+                    </div>
+                    <div class="hardware-meter">
+                      <div><span>GPU</span><strong id="hw-gpu-text">-</strong></div>
+                      <div class="meter-track"><div id="hw-gpu-bar" class="meter-fill gpu"></div></div>
+                    </div>
+                    <div class="hardware-meter">
+                      <div><span>Power</span><strong id="hw-power-text">-</strong></div>
+                      <div class="meter-track"><div id="hw-power-bar" class="meter-fill power"></div></div>
+                    </div>
+                    <div class="hardware-meter">
+                      <div><span>RAM</span><strong id="hw-ram-text">-</strong></div>
+                      <div class="meter-track"><div id="hw-ram-bar" class="meter-fill ram"></div></div>
+                    </div>
+                  </div>
+                  <canvas id="hardware-graph" width="900" height="104"></canvas>
+                  <div id="hardware-detail" class="progress-text">Waiting for GPU data</div>
+                </div>
+              </section>
+            </div>
+
+            <div class="right-stack">
+              <section class="preview-panel">
+                <div class="viewer-toolbar">
+                  <div class="image-controls">
+                    <span>Preview</span>
+                    <label class="video-only" title="Draw the generated 3D body meshes directly over the video preview and keep them synced to the video seekbar."><input id="video-overlay-toggle" name="videoOverlay" type="checkbox" /> 3D Body Overlay</label>
+                    <label class="image-only" title="Show detector bounding boxes on the source image."><input id="image-bbox-toggle" name="imageBbox" type="checkbox" checked /> BBox</label>
+                    <label class="image-only" title="Show model and detector landmark points on the source image."><input id="image-landmarks-toggle" name="imageLandmarks" type="checkbox" checked /> Points</label>
+                    <label class="image-only" title="Show the 2D MHR-70 skeleton overlay, falling back to YOLO points when full keypoints are unavailable."><input id="image-skeleton-toggle" name="imageSkeleton" type="checkbox" checked /> Image Skeleton</label>
+                  </div>
+                  <div class="mesh-controls">
+                    <label title="Show or hide the MHR-70 3D skeleton in the viewer."><input id="mesh-skeleton-toggle" name="meshSkeleton" type="checkbox" checked /> 3D Skeleton</label>
+                    <label title="Show or hide the reconstructed mesh body. Turn this off to inspect the skeleton alone."><input id="mesh-body-toggle" name="meshBody" type="checkbox" checked /> 3D Body</label>
+                    <label title="Render mesh bodies as wireframes."><input id="wireframe-toggle" name="wireframe" type="checkbox" /> Wireframe</label>
+                    <label title="Show or hide the floor grid."><input id="grid-toggle" name="grid" type="checkbox" checked /> Grid</label>
+                    <label class="range-control" title="Change the 3D floor grid size and divisions.">Grid Size <input id="grid-size" name="gridSize" type="range" min="8" max="32" value="8" /><span id="grid-size-label">8</span></label>
+                    <label><input id="auto-rotate-toggle" name="autoRotate" type="checkbox" checked /> Rotate</label>
+                    <button id="reset-view" class="ghost" type="button">Reset</button>
+                    <span id="mesh-state" class="mini-state">Mesh idle</span>
+                  </div>
+                </div>
+                <div class="viewer-grid">
+                  <div class="media-viewer">
+                    <canvas id="canvas" width="960" height="540"></canvas>
+                    <video id="video-preview" controls muted playsinline></video>
+                    <canvas id="video-body-overlay" class="video-body-overlay" width="960" height="540"></canvas>
+                    <div class="media-controls">
+                      <button id="media-zoom-out" class="icon-button" type="button" aria-label="Zoom out image preview">-</button>
+                      <button id="media-zoom-in" class="icon-button" type="button" aria-label="Zoom in image preview">+</button>
+                      <button id="media-reset" class="ghost" type="button">Reset</button>
+                      <span id="media-zoom-state">100%</span>
+                    </div>
+                  </div>
+                  <div class="mesh-column">
+                    <div id="mesh-viewer"></div>
+                    <div id="motion-controls" class="motion-controls" hidden>
+                      <button id="motion-play" class="ghost" type="button">Play</button>
+                      <input id="motion-seek" name="motionSeek" type="range" min="0" max="0" value="0" />
+                      <select id="motion-speed" name="motionSpeed" aria-label="Motion playback speed">
+                        <option value="0.25">0.25x</option>
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="2">2x</option>
+                      </select>
+                      <button id="motion-loop" class="ghost active" type="button">Loop</button>
+                      <span id="motion-frame-label">0 / 0</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <section id="summary-panel" class="summary-panel collapsed">
+                <div class="result-head">
+                  <div>
+                    <h2>Run Output</h2>
+                    <span id="output-state" class="progress-text">Collapsed</span>
+                  </div>
+                  <div class="result-actions">
+                    <button id="copy-output" class="icon-button large" type="button" aria-label="Copy output" title="Copy output">
+                      <span class="copy-icon" aria-hidden="true"></span>
+                    </button>
+                    <button id="download-output" class="icon-button large" type="button" aria-label="Save output" title="Save output">
+                      <span class="download-icon" aria-hidden="true"></span>
+                    </button>
+                    <button id="toggle-output" class="ghost arrow-down" type="button">Expand</button>
+                  </div>
+                </div>
+                <div class="summary-grid">
+                  <div><span>Frames</span><strong id="video-frames">0</strong></div>
+                  <div><span>People</span><strong id="video-people">0</strong></div>
+                  <div><span>FPS</span><strong id="video-fps">-</strong></div>
+                  <div><span>Time</span><strong id="video-time">-</strong></div>
+                </div>
+                <pre id="output"></pre>
+              </section>
+            </div>
+          </div>
+        </section>
+      </section>
+      <footer class="app-footer">
+        <button id="github-link" class="github-link" type="button" data-url="https://github.com/Saganaki22/SAM3DBody_Desktop">
+          <span class="github-wordmark" aria-hidden="true">GitHub</span>
+        </button>
+        <button id="release-link" class="release-link" type="button" data-url="https://github.com/Saganaki22/SAM3DBody_Desktop/releases">
+          Build 0.1.1
+        </button>
+      </footer>
+    </main>
+    <div id="settings-popover" class="settings-popover" hidden>
+      <div class="settings-head">
+        <strong>Settings</strong>
+      </div>
+      <div class="settings-row">
+        <span>Theme</span>
+        <div class="segmented">
+          <button id="theme-dark" type="button">Dark</button>
+          <button id="theme-light" type="button">Light</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span>Accent</span>
+        <div class="accent-picker" aria-label="Accent color">
+          <button class="accent-dot accent-teal" type="button" data-accent-choice="teal" aria-label="Teal accent"></button>
+          <button class="accent-dot accent-blue" type="button" data-accent-choice="blue" aria-label="Blue accent"></button>
+          <button class="accent-dot accent-green" type="button" data-accent-choice="green" aria-label="Green accent"></button>
+          <button class="accent-dot accent-red" type="button" data-accent-choice="red" aria-label="Red accent"></button>
+          <button class="accent-dot accent-yellow" type="button" data-accent-choice="yellow" aria-label="Yellow accent"></button>
+        </div>
+      </div>
+      <label class="settings-scale">
+        UI scale
+        <input id="ui-scale" name="uiScale" type="range" min="90" max="115" value="100" />
+        <span id="ui-scale-label">100%</span>
+      </label>
+      <button id="settings-release-link" class="settings-release" type="button" data-url="https://github.com/Saganaki22/SAM3DBody_Desktop/releases">
+        Build 0.1.1
+      </button>
+      <button id="settings-license-link" class="settings-release" type="button" data-url="https://github.com/Saganaki22/SAM3DBody_Desktop/blob/main/LICENSE">
+        Apache-2.0 License
+      </button>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

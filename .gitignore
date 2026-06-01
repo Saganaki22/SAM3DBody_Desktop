@@ -1,0 +1,55 @@
+# Build artefacts
+build/
+*.o
+*.obj
+*.d
+
+# AmMatrix pre-built test binaries
+AmMatrix/OpenCL/matmul
+AmMatrix/TestCPUOptimizedInstructionSet/TestCPUOptimizedInstructionSet
+AmMatrix/TestCPUOptimizedInstructionSet/TestCPUOptimizedInstructionSetD
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+.venv/
+
+# Desktop/Tauri
+desktop/node_modules/
+desktop/dist/
+desktop/portable-cuda/
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+desktop/src-tauri/resources/engine/*
+!desktop/src-tauri/resources/engine/.gitkeep
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+
+# Temp / scratch
+error.txt
+*.log
+*.valgrind.suppress
+screen*.jpg
+
+# Test data (large media)
+scripts/*.avi
+scripts/*.mp4
+
+# Generated output
+joints.csv
+*.csv
+
+# ONNX Runtime download cache (fetched by CMake at configure time)
+build/onnxruntime_dl/
+
+# Model files — distributed separately via HuggingFace
+onnx/
+SAM3DBody-cpp-onnx-models.zip
