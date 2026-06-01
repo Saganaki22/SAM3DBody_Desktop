@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible SAM3DBody Desktop problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the exact steps, input type, and settings used.
+      placeholder: |
+        1. Load engine
+        2. Select image/video
+        3. Press ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: "0.1.1"
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU and driver
+      placeholder: "RTX 5090, driver ..."
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error message or logs
+      render: text
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshot or sample media
+      description: Attach only files you can share publicly.

@@ -232,31 +232,47 @@ The all-in-one zip is hosted on HuggingFace
 
 ## Build Requirements
 
-Install:
+Known-good Windows build inputs:
 
-- Visual Studio 2022 Build Tools with MSVC C++ workload
-- CMake
-- Ninja
-- Node.js 20+
-- Rust stable
-- OpenCV 4.10 Windows build, `x64/vc16`
-- NVIDIA driver plus CUDA/cuDNN runtime matching the configured CMake build
+| Dependency | Version / Notes |
+| --- | --- |
+| Visual Studio Build Tools | 2022, MSVC C++ workload |
+| CMake | 3.18+ |
+| Ninja | 1.11+ |
+| Node.js | 20+ |
+| Rust | Stable MSVC toolchain |
+| OpenCV | 4.10 Windows build, `x64/vc16` |
+| CUDA | CUDA 13 runtime build for RTX 50-series; set another architecture if needed |
+| cuDNN | cuDNN 9 DLL folder for runtime bundling |
+| WebView2 | Required by Tauri on Windows |
+
+The source repo does not track the large native runtime DLLs or model files. If
+you only want to build the desktop installer and do not want to rebuild the
+native CUDA DLLs yourself, use the runtime DLL pack linked above.
 
 ## Build Native Engine
 
 From the repository root:
 
 ```powershell
-$opencv = "C:\opencv\build"
-$cudnn = "$env:APPDATA\Python\Python314\site-packages\nvidia\cudnn\bin"
+# Set these for your machine before configuring CMake.
+$env:OpenCV_DIR = "C:\opencv\build"
+$env:SAM3D_CUDNN_BIN_DIR = "C:\path\to\cudnn\bin"
+
+$opencv = $env:OpenCV_DIR
+$cudnn = $env:SAM3D_CUDNN_BIN_DIR
 $vsdev = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
-$ninja = "$env:APPDATA\Python\Python314\Scripts\ninja.exe"
+$ninja = (Get-Command ninja).Source
+$cudaArch = if ($env:SAM3D_CUDA_ARCH) { $env:SAM3D_CUDA_ARCH } else { "120" }
+
+if (-not $opencv) { throw "Set OpenCV_DIR to your OpenCV build folder" }
+if (-not $cudnn) { throw "Set SAM3D_CUDNN_BIN_DIR to your cuDNN bin folder" }
 
 cmd /c "`"$vsdev`" -arch=x64 && cmake -S . -B build\windows-cuda -G Ninja `
   -DCMAKE_MAKE_PROGRAM=`"$ninja`" `
   -DCMAKE_BUILD_TYPE=Release `
   -DSAM3D_USE_CUDA=ON `
-  -DCMAKE_CUDA_ARCHITECTURES=120 `
+  -DCMAKE_CUDA_ARCHITECTURES=`"$cudaArch`" `
   -DSAM3D_BUILD_TOOLS=OFF `
   -DSAM3D_BUILD_RENDERER=OFF `
   -DOpenCV_DIR=`"$opencv`" `
@@ -333,6 +349,7 @@ Useful checks:
 cd desktop
 npm run build:vite
 cd src-tauri
+cargo test --lib
 cargo check
 
 cd ..\..
@@ -351,6 +368,9 @@ Expected behavior:
   `cargo build --release`.
 - `npm run build:vite` may warn about a roughly 500 KB JavaScript chunk because
   Three.js is bundled. That warning is not a failed build.
+- GitHub Actions CI runs frontend, Rust, and source hygiene checks. It does not
+  run CUDA inference because hosted runners do not provide the release GPU/model
+  environment.
 
 ## Upstream And Model Credits
 

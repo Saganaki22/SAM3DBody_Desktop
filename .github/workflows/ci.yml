@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  desktop:
+    name: Desktop checks
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: desktop
+        run: npm run build:vite
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --lib
+
+      - name: Check Rust crate
+        run: cargo check --manifest-path desktop/src-tauri/Cargo.toml
+
+      - name: Guard source tree
+        shell: pwsh
+        run: |
+          $bad = git ls-files | Where-Object {
+            $_ -match '(^|/)(target|dist|node_modules|portable-cuda|onnx)(/|$)' -or
+            $_ -match '\.(exe|msi|zip)$' -or
+            $_ -match '^desktop/src-tauri/resources/engine/(?!\.gitkeep$)'
+          }
+          if ($bad) {
+            $bad | ForEach-Object { Write-Error "Generated or runtime artifact is tracked: $_" }
+            exit 1
+          }

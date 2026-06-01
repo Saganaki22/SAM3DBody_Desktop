@@ -1163,3 +1163,103 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running SAM3DBody Desktop");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn unique_temp_dir(name: &str) -> PathBuf {
+        let mut dir = std::env::temp_dir();
+        let stamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        dir.push(format!("sam3dbody_desktop_{name}_{stamp}"));
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn write_file(path: &Path) {
+        fs::write(path, b"test").unwrap();
+    }
+
+    #[test]
+    fn normalize_path_string_strips_quotes_and_extended_prefixes() {
+        assert_eq!(
+            normalize_path_string("\"\\\\?\\C:\\models\\onnx\""),
+            "C:\\models\\onnx"
+        );
+        assert_eq!(
+            normalize_path_string("\\\\?\\UNC\\server\\share\\onnx"),
+            "\\\\server\\share\\onnx"
+        );
+    }
+
+    #[test]
+    fn model_paths_from_onnx_dir_requires_complete_model_set() {
+        let dir = unique_temp_dir("models");
+        for name in [
+            "pipeline.gguf",
+            "yolo.onnx",
+            "decoder.onnx",
+            "backbone.onnx",
+            "backbone.onnx.data",
+            "body_model.lbs",
+            "correctives.bin",
+            "keypoint_mapping.bin",
+        ] {
+            write_file(&dir.join(name));
+        }
+
+        let paths = model_paths_from_onnx_dir(&dir).expect("complete model folder");
+        assert_eq!(paths.backbone_name, "backbone.onnx");
+        assert!(paths.gguf_path.ends_with("pipeline.gguf"));
+        assert!(paths.yolo_path.ends_with("yolo.onnx"));
+
+        fs::remove_file(dir.join("correctives.bin")).unwrap();
+        assert!(model_paths_from_onnx_dir(&dir).is_none());
+
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn parse_tri_topology_reads_vertex_count_and_indices() {
+        const TRI_HEADER_SIZE: usize = 136;
+        let dir = unique_temp_dir("tri");
+        let path = dir.join("body_mesh.tri");
+        let mut bytes = vec![0u8; TRI_HEADER_SIZE];
+        bytes[0..5].copy_from_slice(b"TRI3D");
+        bytes[16..20].copy_from_slice(&4u32.to_le_bytes());
+        bytes[24..28].copy_from_slice(&9u32.to_le_bytes());
+        bytes[40..44].copy_from_slice(&3u32.to_le_bytes());
+        for value in 0..9u32 {
+            bytes.extend_from_slice(&(value as f32).to_le_bytes());
+        }
+        for index in [0u32, 1, 2] {
+            bytes.extend_from_slice(&index.to_le_bytes());
+        }
+        fs::write(&path, bytes).unwrap();
+
+        let topology = parse_tri_topology(&path).unwrap();
+        assert_eq!(topology.vertex_count, 3);
+        assert_eq!(topology.indices, vec![0, 1, 2]);
+
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn find_motion_output_files_finds_multi_person_siblings() {
+        let dir = unique_temp_dir("motion");
+        let base = dir.join("clip.bvh");
+        let first = dir.join("clip_0.bvh");
+        let second = dir.join("clip_1.bvh");
+        write_file(&first);
+        write_file(&second);
+        write_file(&dir.join("other_0.bvh"));
+
+        let files = find_motion_output_files(&base).unwrap();
+        assert_eq!(files, vec![first, second]);
+
+        fs::remove_dir_all(dir).unwrap();
+    }
+}
