@@ -35,9 +35,12 @@ Primary target:
 - Minimum app window size: 1180 x 720
 - Visual Studio 2022 MSVC toolchain
 - NVIDIA GPU with a driver new enough for CUDA 13 runtime DLLs
-- At least 8 GB VRAM for the CUDA path; observed peak usage is about 7.2 GB
+- Ampere, Lovelace, or Blackwell RTX GPU with 8 GB+ VRAM
+  (RTX 30-series, 40-series, or 50-series).
+- Observed peak VRAM usage is about 7.2 GB
   during model load/inference with the bundled model set.
-- RTX 50-series tested path, including RTX 5090 / `sm_120`
+- The v0.1.2 bundled CUDA runtime targets `sm_86`, `sm_89`, and `sm_120`
+  for RTX 30xx, 40xx, and 50xx cards.
 - Tauri 2 desktop runtime / WebView2
 
 Likely compatible:
@@ -157,6 +160,7 @@ Install:
 - Rust stable
 - OpenCV 4.10 Windows build, `x64/vc16`
 - NVIDIA driver plus CUDA/cuDNN runtime matching the configured CMake build
+  (`sm_86;89;120` for RTX 30/40/50 series in the v0.1.2 runtime)
 
 ## Build Native Engine
 
@@ -172,7 +176,7 @@ cmd /c "`"$vsdev`" -arch=x64 && cmake -S . -B build\windows-cuda -G Ninja `
   -DCMAKE_MAKE_PROGRAM=`"$ninja`" `
   -DCMAKE_BUILD_TYPE=Release `
   -DSAM3D_USE_CUDA=ON `
-  -DCMAKE_CUDA_ARCHITECTURES=120 `
+  -DCMAKE_CUDA_ARCHITECTURES=86;89;120 `
   -DSAM3D_BUILD_TOOLS=OFF `
   -DSAM3D_BUILD_RENDERER=OFF `
   -DOpenCV_DIR=`"$opencv`" `

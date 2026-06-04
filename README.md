@@ -112,9 +112,12 @@ Primary target:
 - Minimum app window size: 1180 x 720
 - Visual Studio 2022 MSVC toolchain
 - NVIDIA GPU with a driver new enough for CUDA 13 runtime DLLs
-- At least 8 GB VRAM for the CUDA path; observed peak usage is about 7.2 GB
+- Ampere, Lovelace, or Blackwell RTX GPU with 8 GB+ VRAM
+  (RTX 30-series, 40-series, or 50-series).
+- Observed peak VRAM usage is about 7.2 GB
   during model load/inference with the bundled model set.
-- RTX 50-series tested path, including RTX 5090 / `sm_120`
+- The v0.1.2 bundled CUDA runtime targets `sm_86`, `sm_89`, and `sm_120`
+  for RTX 30xx, 40xx, and 50xx cards.
 - Tauri 2 desktop runtime / WebView2
 
 Likely compatible:
@@ -242,7 +245,7 @@ Known-good Windows build inputs:
 | Node.js | 20+ |
 | Rust | Stable MSVC toolchain |
 | OpenCV | 4.10 Windows build, `x64/vc16` |
-| CUDA | CUDA 13 runtime build for RTX 50-series; set another architecture if needed |
+| CUDA | CUDA 13 runtime build for Ampere/Lovelace/Blackwell RTX GPUs: `sm_86;89;120` |
 | cuDNN | cuDNN 9 DLL folder for runtime bundling |
 | WebView2 | Required by Tauri on Windows |
 
@@ -263,7 +266,7 @@ $opencv = $env:OpenCV_DIR
 $cudnn = $env:SAM3D_CUDNN_BIN_DIR
 $vsdev = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
 $ninja = (Get-Command ninja).Source
-$cudaArch = if ($env:SAM3D_CUDA_ARCH) { $env:SAM3D_CUDA_ARCH } else { "120" }
+$cudaArch = if ($env:SAM3D_CUDA_ARCH) { $env:SAM3D_CUDA_ARCH } else { "86;89;120" }
 
 if (-not $opencv) { throw "Set OpenCV_DIR to your OpenCV build folder" }
 if (-not $cudnn) { throw "Set SAM3D_CUDNN_BIN_DIR to your cuDNN bin folder" }
