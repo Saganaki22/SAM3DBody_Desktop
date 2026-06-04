@@ -41,7 +41,7 @@ Fastest way to get up and running.
 
 **Download:**
 
-- [portable-cuda.zip](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/portable-cuda.zip)
+- [portable-cuda-0.1.2.zip](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.2/portable-cuda-0.1.2.zip)
 
 ---
 
@@ -51,7 +51,7 @@ Standard Windows installation.
 
 **Download:**
 
-- [SAM3DBody.Desktop_0.1.1_x64-setup.exe](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/SAM3DBody.Desktop_0.1.1_x64-setup.exe)
+- [SAM3DBody.Desktop_0.1.2_x64-setup.exe](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.2/SAM3DBody.Desktop_0.1.2_x64-setup.exe)
 
 ---
 
@@ -61,7 +61,7 @@ For enterprise deployment and MSI-based installation workflows.
 
 **Download:**
 
-- [SAM3DBody.Desktop_0.1.1_x64_en-US.msi](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/SAM3DBody.Desktop_0.1.1_x64_en-US.msi)
+- [SAM3DBody.Desktop_0.1.2_x64_en-US.msi](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.2/SAM3DBody.Desktop_0.1.2_x64_en-US.msi)
 
 ---
 
@@ -214,7 +214,7 @@ The Windows installers and `portable-cuda.zip` already include the native DLLs.
 If you are building the app from source and do not want to rebuild/copy the
 native CUDA runtime files yourself, download the runtime DLL pack:
 
-[SAM3DBody-Desktop_engine-runtime-cuda13-win64-dlls.zip](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.1/SAM3DBody-Desktop_engine-runtime-cuda13-win64-dlls.zip)
+[SAM3DBody-Desktop_engine-runtime-cuda13-win64-dlls.zip](https://github.com/Saganaki22/SAM3DBody_Desktop/releases/download/v0.1.2/SAM3DBody-Desktop_engine-runtime-cuda13-win64-dlls.zip)
 
 Extract it into `desktop/src-tauri/` so it creates
 `desktop/src-tauri/resources/engine/`.
